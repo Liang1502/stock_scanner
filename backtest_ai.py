@@ -75,12 +75,16 @@ from strategy_config import (
     A_ATR_STOP_MULT,
     A_ATR_TRAIL_MULT,
     A_ATR_TIGHTEN_MULT,
+    A_MIN_STOP_PCT,
+    A_MAX_STOP_PCT,
     INST_W_DEALER,
     INST_W_FOREIGN,
     INST_W_TRUST,
     ATR_STOP_MULT,
     ATR_TRAIL_MULT,
     ATR_TIGHTEN_MULT,
+    MIN_STOP_PCT,
+    MAX_STOP_PCT,
     INIT_STOP_PCT,
     INST_LOOKBACK,
     INST_PATH,
@@ -579,6 +583,16 @@ def _atr_mults(strategy: str) -> tuple[float, float, float]:
     return ATR_STOP_MULT, ATR_TRAIL_MULT, ATR_TIGHTEN_MULT
 
 
+def _initial_stop(entry_price: float, atr_w: float, s_mult: float, strategy: str) -> float:
+    """ATR-based initial stop clamped to [min_stop, max_stop] range."""
+    if atr_w > 0:
+        floor = A_MIN_STOP_PCT if strategy == "A" else MIN_STOP_PCT
+        ceiling = A_MAX_STOP_PCT if strategy == "A" else MAX_STOP_PCT
+        raw_pct = s_mult * atr_w / entry_price
+        return entry_price * (1 - max(floor, min(ceiling, raw_pct)))
+    return entry_price * (1 - INIT_STOP_PCT)
+
+
 def simulate_hold(
     trade: Trade,
     entry_idx: int,
@@ -597,10 +611,7 @@ def simulate_hold(
 
     s_mult, tr_mult, tg_mult = _atr_mults(trade.strategy)
     atr_w = (trade.entry_atr or 0.0) * trade.entry_price  # ATR in price units
-    if atr_w > 0:
-        stop = trade.entry_price - s_mult * atr_w
-    else:
-        stop = trade.entry_price * (1 - INIT_STOP_PCT)
+    stop  = _initial_stop(trade.entry_price, atr_w, s_mult, trade.strategy)
     peak  = trade.entry_price
 
     for i, row in sub.iterrows():
@@ -721,12 +732,12 @@ def run_backtest(
                 prev_peak = float(prev_rows["high"].max())
                 if atr_w > 0:
                     prev_mult = tg_mult if prev_peak >= tr.entry_price * (1 + TARGET_PCT) else tr_mult
-                    prev_stop = max(tr.entry_price - s_mult * atr_w, prev_peak - prev_mult * atr_w)
+                    prev_stop = max(_initial_stop(tr.entry_price, atr_w, s_mult, tr.strategy), prev_peak - prev_mult * atr_w)
                 else:
                     prev_trail_pct = TRAIL_TIGHTEN_PCT if prev_peak >= tr.entry_price * (1 + TARGET_PCT) else TRAIL_PCT
                     prev_stop = max(tr.entry_price * (1 - INIT_STOP_PCT), prev_peak * (1 - prev_trail_pct))
             else:
-                prev_stop = (tr.entry_price - s_mult * atr_w) if atr_w > 0 else tr.entry_price * (1 - INIT_STOP_PCT)
+                prev_stop = _initial_stop(tr.entry_price, atr_w, s_mult, tr.strategy)
             if open_ < prev_stop:
                 tr.exit_date   = d_str
                 tr.exit_price  = open_
@@ -740,7 +751,7 @@ def run_backtest(
             ]["high"].max())
             if atr_w > 0:
                 trail_stop = peak - (tg_mult if peak >= tr.entry_price * (1 + TARGET_PCT) else tr_mult) * atr_w
-                init_stop  = tr.entry_price - s_mult * atr_w
+                init_stop  = _initial_stop(tr.entry_price, atr_w, s_mult, tr.strategy)
             else:
                 trail_pct  = TRAIL_TIGHTEN_PCT if peak >= tr.entry_price * (1 + TARGET_PCT) else TRAIL_PCT
                 trail_stop = peak * (1 - trail_pct)

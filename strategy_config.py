@@ -36,6 +36,12 @@ A_ATR_STOP_MULT    = 1.5
 A_ATR_TRAIL_MULT   = 2.0
 A_ATR_TIGHTEN_MULT = 1.2
 
+# ATR 停損邊界：防止低波動股 stop 過緊（day-1 出場）或高波動股 stop 過寬（大虧損）
+A_MIN_STOP_PCT = 0.03   # 策略 A 最小停損幅度
+A_MAX_STOP_PCT = 0.07   # 策略 A 最大停損幅度
+MIN_STOP_PCT   = 0.04   # B/C/D 最小停損幅度
+MAX_STOP_PCT   = 0.10   # B/C/D 最大停損幅度
+
 BUY_FEE_RATE = 0.000399
 SELL_FEE_RATE = 0.000399
 TAX_RATE = 0.003
@@ -65,7 +71,7 @@ W_DELTA = 0.20
 A_SECTOR_TOP = 3
 A_MAX_RSI = 72
 A_MAX_RUN5 = 0.15
-A_MIN_INST = 1
+A_MIN_INST = 2
 A_EXCLUDE_SECTORS = {"IC設計"}
 
 B_SECTOR_TOP = 5
