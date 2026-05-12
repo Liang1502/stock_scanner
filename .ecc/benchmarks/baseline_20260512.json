@@ -1,0 +1,55 @@
+{
+  "generated": "2026-05-12",
+  "source_files": {
+    "A": "ai_strategy_A_20260511.csv",
+    "B": "ai_strategy_B_20260511.csv",
+    "C": "ai_strategy_C_20260511.csv",
+    "D": "ai_strategy_D_20260511.csv"
+  },
+  "strategies": {
+    "A": {
+      "n_trades": 350,
+      "win_rate": 0.4114,
+      "avg_net": 0.00954,
+      "median_net": -0.01785,
+      "max_loss": -0.1255,
+      "max_gain": 0.4326,
+      "avg_hold_days": 6.3,
+      "profit_factor": 1.961,
+      "pct_loss_gt5pct": 0.6068
+    },
+    "B": {
+      "n_trades": 56,
+      "win_rate": 0.4643,
+      "avg_net": 0.01616,
+      "median_net": -0.00425,
+      "max_loss": -0.0822,
+      "max_gain": 0.2424,
+      "avg_hold_days": 8.8,
+      "profit_factor": 2.006,
+      "pct_loss_gt5pct": 0.5333
+    },
+    "C": {
+      "n_trades": 122,
+      "win_rate": 0.459,
+      "avg_net": 0.01764,
+      "median_net": -0.0177,
+      "max_loss": -0.0894,
+      "max_gain": 0.2659,
+      "avg_hold_days": 7.3,
+      "profit_factor": 2.061,
+      "pct_loss_gt5pct": 0.5455
+    },
+    "D": {
+      "n_trades": 86,
+      "win_rate": 0.4767,
+      "avg_net": 0.02143,
+      "median_net": -0.00605,
+      "max_loss": -0.0641,
+      "max_gain": 0.2659,
+      "avg_hold_days": 7.5,
+      "profit_factor": 2.2,
+      "pct_loss_gt5pct": 0.4667
+    }
+  }
+}
