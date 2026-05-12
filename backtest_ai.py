@@ -65,6 +65,7 @@ from strategy_config import (
     D_MAX_RUN5,
     D_MIN_INST_20D,
     D_MIN_REV_YOY,
+    D_MIN_SECTOR_MOM20,
     D_RSI_HI,
     D_RSI_LO,
     D_SECTOR_TOP,
@@ -74,6 +75,9 @@ from strategy_config import (
     A_ATR_STOP_MULT,
     A_ATR_TRAIL_MULT,
     A_ATR_TIGHTEN_MULT,
+    INST_W_DEALER,
+    INST_W_FOREIGN,
+    INST_W_TRUST,
     ATR_STOP_MULT,
     ATR_TRAIL_MULT,
     ATR_TIGHTEN_MULT,
@@ -258,7 +262,11 @@ def _raw_sector_scores(
             (inst_df["date"] >= cutoff) &
             (inst_df["date"] <= d_str)
         ]
-        inst_net = int(sec_inst["foreign_net"].sum() + sec_inst["trust_net"].sum())
+        inst_net = int(
+            INST_W_FOREIGN * sec_inst["foreign_net"].sum()
+            + INST_W_TRUST  * sec_inst["trust_net"].sum()
+            + INST_W_DEALER * sec_inst["dealer_net"].sum()
+        )
 
         if not mom_vals:
             continue
@@ -404,7 +412,11 @@ def _stock_ctx(sid: str, d_str: str, kbars: dict, inst_df: pd.DataFrame, rev_df:
     def _inst_sum(from_d: str, to_d: str) -> int:
         mask = (d_inst["date"] >= from_d) & (d_inst["date"] <= to_d)
         s = d_inst[mask]
-        return int(s["foreign_net"].sum() + s["trust_net"].sum())
+        return int(
+            INST_W_FOREIGN * s["foreign_net"].sum()
+            + INST_W_TRUST  * s["trust_net"].sum()
+            + INST_W_DEALER * s["dealer_net"].sum()
+        )
 
     # 日期計算輔助（只用已知 trading dates）
     dates_before = sorted(d_inst[d_inst["date"] <= d_str]["date"].unique())
@@ -535,6 +547,9 @@ def signal_D(ctx: dict, sector_avg_run20: float) -> bool:
 
     sector_top=3 由 run_backtest 控制，signal_D 條件同 C。
     """
+    # 子題材絕對動能：整個題材需正在上漲，避免選空頭題材中的「最強弱雞」
+    if sector_avg_run20 < D_MIN_SECTOR_MOM20:
+        return False
     if ctx["close"] < ctx["ma20"]:
         return False
     if not (D_RSI_LO <= ctx["rsi"] <= D_RSI_HI):

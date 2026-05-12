@@ -45,6 +45,11 @@ def net_return_rate(entry_price: float, exit_price: float) -> float:
     cost_rate = BUY_FEE_RATE + (exit_price / entry_price) * (SELL_FEE_RATE + TAX_RATE)
     return gross - cost_rate
 
+# 三大法人訊號權重（研究依據：投信訊號對中型股最可靠，自營商雜訊高）
+INST_W_TRUST   = 0.60
+INST_W_FOREIGN = 0.30
+INST_W_DEALER  = 0.10
+
 MIN_SECTOR_STOCKS = 2
 MIN_AVG_LOTS = 200
 MIN_REV_YOY = -5.0
@@ -85,6 +90,7 @@ D_VOL_RATIO = 1.1
 D_MIN_INST_20D = 1
 D_MIN_MA60_SLOPE = 0.0      # 保留欄位（未使用）
 D_MIN_REV_YOY = -5.0        # 同 C 策略
+D_MIN_SECTOR_MOM20 = 0.03   # 子題材 20 日平均漲幅 > 3%，避免選空頭題材中的「最強弱雞」
 D_EXCLUDE_SECTORS: set[str] = {"PCB上游材料"}
 
 INTRADAY_VOL_SCALE_CAP = 6.0
